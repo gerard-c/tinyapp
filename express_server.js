@@ -3,16 +3,16 @@ const app = express();
 
 const PORT = 8080; // default port for localhost
 
-const bodyParser = require('body-parser');
-app.use(bodyParser.urlencoded({extended: true}));
-
 app.set('view engine', 'ejs');
+
 
 const urlDatabase = {
   'b2xVn2': 'http://www.lighthouselabs.ca',
   '9sm5xK': 'http://www.google.com'
 };
 
+const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({extended: true}));
 app.get('/', (req, res) => {
   // displays message on homepage (designated by / as an empty path)
   res.send('Hello!');
@@ -31,13 +31,18 @@ app.get('/urls', (req, res) => {
 
 app.get('/urls/new', (req, res) => {
   res.render('urls_new');
-})
+});
+
+app.post('/urls', (req, res) => {
+  console.log(req.body);
+  res.send('Ok');
+});
 
 app.get('/urls/:shortURL', (req, res) => {
   // content of /urls and urlDatabase to be used in separate pages of shortened URLs
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render('urls_show', templateVars);
-})
+});
 
 app.get('/hello', (req, res) => {
   // HTML formatting to display Hello World with World in bold
