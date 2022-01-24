@@ -1,18 +1,28 @@
 const express = require('express');
 const app = express();
+const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({ extended: true }));
 
 const PORT = 8080; // default port for localhost
 
 app.set('view engine', 'ejs');
 
+const generateRandomString = () => {
+  // function generates "random" series of alphanumeric characters to function as a shortened URL
+  let shortURL = '';
+  const characters = 'aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ0123456789';
+
+  for (let i = 0; i < 6; i++) {
+    shortURL += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return shortURL;
+};
 
 const urlDatabase = {
   'b2xVn2': 'http://www.lighthouselabs.ca',
   '9sm5xK': 'http://www.google.com'
 };
 
-const bodyParser = require('body-parser');
-app.use(bodyParser.urlencoded({extended: true}));
 app.get('/', (req, res) => {
   // displays message on homepage (designated by / as an empty path)
   res.send('Hello!');
@@ -34,6 +44,7 @@ app.get('/urls/new', (req, res) => {
 });
 
 app.post('/urls', (req, res) => {
+  // placeholder response to POST request using input/form
   console.log(req.body);
   res.send('Ok');
 });
