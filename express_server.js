@@ -25,6 +25,11 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', templateVars);
 });
 
+app.get('/urls/:shortURL', (req, res) => {
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  res.render('urls_show', templateVars);
+})
+
 app.get('/hello', (req, res) => {
   // HTML formatting to display Hello World with World in bold
   res.send('<html><body>Hello <b>World</b></body></html>\n');
