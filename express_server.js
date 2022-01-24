@@ -10,15 +10,23 @@ const urlDatabase = {
 };
 
 app.get('/', (req, res) => {
-  // prints message to homepage (designated by / as an empty path)
+  // displays message on homepage (designated by / as an empty path)
   res.send('Hello!');
 });
 
 app.get('/urls.json', (req, res) => {
+  // displays JSON string with content of URL database on /urls.json
   res.json(urlDatabase);
 });
 
+app.get('/urls', (req, res) => {
+  // content of urlDatabase to be displayed on /urls
+  const templateVars = { urls: urlDatabase };
+  res.render('urls_index', templateVars);
+});
+
 app.get('/hello', (req, res) => {
+  // HTML formatting to display Hello World with World in bold
   res.send('<html><body>Hello <b>World</b></body></html>\n');
 });
 
