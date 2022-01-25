@@ -66,7 +66,12 @@ app.get('/u/:shortURL', (req, res) => {
   // clicking on any of the shortURL links will redirect the user to the corresponding longURL in the urlDatabase object
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
-})
+});
+
+app.post('/urls/:shortURL/delete', (req, res) => {
+  delete urlDatabase[req.params.shortURL];
+  res.redirect('/urls');
+});
 
 app.get('/hello', (req, res) => {
   // HTML formatting to display Hello World with World in bold
