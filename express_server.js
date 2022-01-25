@@ -48,8 +48,11 @@ app.get('/urls/new', (req, res) => {
 app.post('/urls', (req, res) => {
   // updates urlDatabase to include URL given in form, assigned to a random string as a shortened URL
   const shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL;
-  console.log(urlDatabase);
+  let _longURL = req.body.longURL;
+  if (!_longURL.includes('://')) {
+    _longURL = 'http://' + _longURL;
+  }
+  urlDatabase[shortURL] = _longURL;
   res.redirect(`/urls/${shortURL}`);
 });
 
