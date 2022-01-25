@@ -69,6 +69,7 @@ app.get('/u/:shortURL', (req, res) => {
 });
 
 app.post('/urls/:shortURL/delete', (req, res) => {
+  // routes to delete buttons on index page, causing properties to be deleted from urlDatabase
   delete urlDatabase[req.params.shortURL];
   res.redirect('/urls');
 });
