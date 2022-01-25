@@ -4,6 +4,9 @@ const app = express();
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
 
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
 const PORT = 8080; // default port for localhost
 
 app.set('view engine', 'ejs');
@@ -23,6 +26,12 @@ const urlDatabase = {
   'b2xVn2': 'http://www.lighthouselabs.ca',
   '9sm5xK': 'http://www.google.com'
 };
+
+app.post('/login', (req, res) => {
+  const input = req.body.username;
+  res.cookie('username', input);
+  res.redirect('/urls');
+});
 
 app.get('/urls', (req, res) => {
   // content of urlDatabase to be displayed on /urls
