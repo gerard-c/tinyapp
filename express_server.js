@@ -47,8 +47,9 @@ app.post('/urls', (req, res) => {
 });
 
 app.post('/u/:shortURL', (req, res) => {
+  // updates existing shortURL with new longURL specified in input field
   const shortURL = req.params.shortURL;
-  let longURL = req.body.newURL;
+  let longURL = req.body.newURL
   if (!longURL.includes('http://')) {
     longURL = 'http://' + longURL;
   }
@@ -70,7 +71,7 @@ app.get('/u/:shortURL', (req, res) => {
 
 app.post('/urls/:shortURL', (req, res) => {
   // when edit button on index page is clicked, redirects to approprite shortURL page
-  res.redirect(`/urls/${req.params.shortURL}`);
+  res.redirect(`/urls/${req.params.shortURL}`)
 });
 
 app.post('/urls/:shortURL/delete', (req, res) => {
