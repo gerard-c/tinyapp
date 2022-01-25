@@ -56,6 +56,11 @@ app.post('/urls', (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
+app.post('/urls/:shortURL', (req, res) => {
+  // when edit button on index page is clicked, redirects to approprite shortURL page
+  res.redirect(`/urls/${req.params.shortURL}`)
+});
+
 app.get('/urls/:shortURL', (req, res) => {
   // content of /urls and urlDatabase to be used in separate pages of shortened URLs
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
