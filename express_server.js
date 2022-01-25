@@ -35,13 +35,17 @@ app.post('/login', (req, res) => {
 
 app.get('/urls', (req, res) => {
   // content of urlDatabase to be displayed on /urls
-  const templateVars = { urls: urlDatabase };
+  const templateVars = {
+    username: req.cookies['username'],
+    urls: urlDatabase
+  };
   res.render('urls_index', templateVars);
 });
 
 app.get('/urls/new', (req, res) => {
   // route to page where user can input new URLs to be shortened
-  res.render('urls_new');
+  const templateVars = { username: req.cookies['username'] }
+  res.render('urls_new', templateVars);
 });
 
 app.post('/urls', (req, res) => {
@@ -68,7 +72,11 @@ app.post('/u/:shortURL', (req, res) => {
 
 app.get('/urls/:shortURL', (req, res) => {
   // content of /urls and urlDatabase to be used in separate pages of shortened URLs
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  const templateVars = {
+    username: req.cookies['username'],
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL]
+  };
   res.render('urls_show', templateVars);
 });
 
