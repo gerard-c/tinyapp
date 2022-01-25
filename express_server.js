@@ -24,16 +24,6 @@ const urlDatabase = {
   '9sm5xK': 'http://www.google.com'
 };
 
-app.get('/', (req, res) => {
-  // displays message on homepage (designated by / as an empty path)
-  res.send('Hello!');
-});
-
-app.get('/urls.json', (req, res) => {
-  // displays JSON string with content of URL database on /urls.json
-  res.json(urlDatabase);
-});
-
 app.get('/urls', (req, res) => {
   // content of urlDatabase to be displayed on /urls
   const templateVars = { urls: urlDatabase };
@@ -48,17 +38,22 @@ app.get('/urls/new', (req, res) => {
 app.post('/urls', (req, res) => {
   // updates urlDatabase to include URL given in form, assigned to a random string as a shortened URL
   const shortURL = generateRandomString();
-  let _longURL = req.body.longURL;
-  if (!_longURL.includes('http://')) {
-    _longURL = 'http://' + _longURL;
+  let longURL = req.body.longURL;
+  if (!longURL.includes('http://')) {
+    longURL = 'http://' + longURL;
   }
-  urlDatabase[shortURL] = _longURL;
+  urlDatabase[shortURL] = longURL;
   res.redirect(`/urls/${shortURL}`);
 });
 
-app.post('/urls/:shortURL', (req, res) => {
-  // when edit button on index page is clicked, redirects to approprite shortURL page
-  res.redirect(`/urls/${req.params.shortURL}`)
+app.post('/u/:shortURL', (req, res) => {
+  const shortURL = req.params.shortURL;
+  let longURL = req.body.newURL;
+  if (!longURL.includes('http://')) {
+    longURL = 'http://' + longURL;
+  }
+  urlDatabase[shortURL] = longURL;
+  res.redirect(`/urls/${shortURL}`);
 });
 
 app.get('/urls/:shortURL', (req, res) => {
@@ -73,18 +68,18 @@ app.get('/u/:shortURL', (req, res) => {
   res.redirect(longURL);
 });
 
+app.post('/urls/:shortURL', (req, res) => {
+  // when edit button on index page is clicked, redirects to approprite shortURL page
+  res.redirect(`/urls/${req.params.shortURL}`);
+});
+
 app.post('/urls/:shortURL/delete', (req, res) => {
   // routes to delete buttons on index page, causing properties to be deleted from urlDatabase
   delete urlDatabase[req.params.shortURL];
   res.redirect('/urls');
 });
 
-app.get('/hello', (req, res) => {
-  // HTML formatting to display Hello World with World in bold
-  res.send('<html><body>Hello <b>World</b></body></html>\n');
-});
-
 app.listen(PORT, () => {
   // message to console confirming that server is running
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`tinyApp listening on port ${PORT}!`);
 });
