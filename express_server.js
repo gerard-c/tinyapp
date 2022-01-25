@@ -28,8 +28,15 @@ const urlDatabase = {
 };
 
 app.post('/login', (req, res) => {
+  // saves input entry to cookies as 'username'
   const input = req.body.username;
   res.cookie('username', input);
+  res.redirect('/urls');
+});
+
+app.post('/logout', (req, res) => {
+  // clears 'username' cookie
+  res.clearCookie('username');
   res.redirect('/urls');
 });
 
@@ -44,7 +51,7 @@ app.get('/urls', (req, res) => {
 
 app.get('/urls/new', (req, res) => {
   // route to page where user can input new URLs to be shortened
-  const templateVars = { username: req.cookies['username'] }
+  const templateVars = { username: req.cookies['username'] };
   res.render('urls_new', templateVars);
 });
 
@@ -62,7 +69,7 @@ app.post('/urls', (req, res) => {
 app.post('/u/:shortURL', (req, res) => {
   // updates existing shortURL with new longURL specified in input field
   const shortURL = req.params.shortURL;
-  let longURL = req.body.newURL
+  let longURL = req.body.newURL;
   if (!longURL.includes('http://')) {
     longURL = 'http://' + longURL;
   }
@@ -88,7 +95,7 @@ app.get('/u/:shortURL', (req, res) => {
 
 app.post('/urls/:shortURL', (req, res) => {
   // when edit button on index page is clicked, redirects to approprite shortURL page
-  res.redirect(`/urls/${req.params.shortURL}`)
+  res.redirect(`/urls/${req.params.shortURL}`);
 });
 
 app.post('/urls/:shortURL/delete', (req, res) => {
