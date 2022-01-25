@@ -41,14 +41,16 @@ app.get('/urls', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
+  // route to page where user can input new URLs to be shortened
   res.render('urls_new');
 });
 
 app.post('/urls', (req, res) => {
   // updates urlDatabase to include URL given in form, assigned to a random string as a shortened URL
-  urlDatabase[generateRandomString()] = req.body.longURL;
+  const shortURL = generateRandomString();
+  urlDatabase[shortURL] = req.body.longURL;
   console.log(urlDatabase);
-  res.send('Ok');
+  res.redirect(`/urls/${shortURL}`);
 });
 
 app.get('/urls/:shortURL', (req, res) => {
@@ -56,6 +58,12 @@ app.get('/urls/:shortURL', (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render('urls_show', templateVars);
 });
+
+app.get('/u/:shortURL', (req, res) => {
+  // clicking on any of the shortURL links will redirect the user to the corresponding longURL in the urlDatabase object
+  const longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
+})
 
 app.get('/hello', (req, res) => {
   // HTML formatting to display Hello World with World in bold
