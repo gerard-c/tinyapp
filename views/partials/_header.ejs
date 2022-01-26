@@ -16,7 +16,7 @@
           <a href="/register">REGISTER</a>
       <% } else { %>
           <form action="/logout" method="POST">
-            <label for="logout">Logged in as: <%= user.email %>!</label>
+            <label for="logout" style="margin: 1em;">Logged in as: <%= user.email %>!</label>
             <button type="submit" name="logout" class="btn btn-outline-dark">Logout</button>
           </form>
       <% } %>

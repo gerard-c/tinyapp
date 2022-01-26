@@ -20,9 +20,9 @@ const generateRandomString = () => {
   return output;
 };
 
-const emailLookup = (newEmail) => {
+const emailLookup = (targetEmail) => {
   for (const user in users) {
-    if (users[user].email === newEmail) {
+    if (users[user].email === targetEmail) {
       return true;
     }
   }
@@ -48,10 +48,64 @@ const urlDatabase = {
 };
 
 
-// app.post('/logout', (req, res) => {
-//   res.clearCookie('user_id');
-//   res.redirect('/register');
-// });
+app.get('/login', (req, res) => {
+  res.render('urls_login', { user: users[req.cookies['user_id']] });
+});
+  
+app.get('/urls', (req, res) => {
+  // content of urlDatabase to be displayed on /urls
+  const templateVars = {
+    user: users[req.cookies['user_id']],
+    urls: urlDatabase
+  };
+  res.render('urls_index', templateVars);
+});
+
+app.get('/urls/new', (req, res) => {
+  // route to page where user can input new URLs to be shortened
+  res.render('urls_new', { user: users[req.cookies['user_id']] });
+});
+
+app.get('/register', (req, res) => {
+  res.render('urls_register', { user: users[req.cookies['user_id']] });
+});
+
+app.get('/urls/:shortURL', (req, res) => {
+  // content of /urls and urlDatabase to be used in separate pages of shortened URLs
+  const templateVars = {
+    user: users[req.cookies['user_id']],
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL]
+  };
+  res.render('urls_show', templateVars);
+});
+
+app.get('/u/:shortURL', (req, res) => {
+  // clicking on any of the shortURL links will redirect the user to the corresponding longURL in the urlDatabase object
+  const longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
+});
+
+app.post('/logout', (req, res) => {
+  res.clearCookie('user_id');
+  res.redirect('/login');
+}); 
+
+app.post('/login', (req, res) => {
+  let userID = ''
+  if (!emailLookup(req.body.email)) {
+    return res.status(403).send('There is no user registered to that email address');
+  }
+  for (const user in users) {
+    console.log(users[user].password, req.body.password)
+    if (users[user].password === req.body.password) {
+      userID = users[user].id;
+      res.cookie('user_id', users[userID].id);
+      return res.redirect('/urls');
+    }
+  }
+  return res.status(403).send('Incorrect password');
+});
   
 app.post('/register', (req, res) => {
   if (!req.body.email || !req.body.password) {
@@ -66,30 +120,9 @@ app.post('/register', (req, res) => {
     email: req.body.email,
     password: req.body.password
   };
-  res.cookie('user_id', users[randomID]);
+  res.cookie('user_id', users[randomID].id);
+  console.log(users[req.cookies['user_id']]);
   res.redirect('/urls');
-});
-
-app.get('/login', (req, res) => {
-  res.render('urls_login', { user: users[req.cookies['user_id'].id] });
-});
-  
-app.get('/urls', (req, res) => {
-  // content of urlDatabase to be displayed on /urls
-  const templateVars = {
-    user: users[req.cookies['user_id'].id],
-    urls: urlDatabase
-  };
-  res.render('urls_index', templateVars);
-});
-
-app.get('/urls/new', (req, res) => {
-  // route to page where user can input new URLs to be shortened
-  res.render('urls_new', { user: users[req.cookies['user_id'].id] });
-});
-
-app.get('/register', (req, res) => {
-  res.render('urls_register', { user: users[req.cookies['user_id'].id] });
 });
 
 app.post('/urls', (req, res) => {
@@ -111,22 +144,6 @@ app.post('/u/:shortURL', (req, res) => {
   }
   urlDatabase[req.params.shortURL] = longURL;
   res.redirect(`/urls/${req.params.shortURL}`);
-});
-
-app.get('/urls/:shortURL', (req, res) => {
-  // content of /urls and urlDatabase to be used in separate pages of shortened URLs
-  const templateVars = {
-    user: users[req.cookies['user_id'].id],
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL]
-  };
-  res.render('urls_show', templateVars);
-});
-
-app.get('/u/:shortURL', (req, res) => {
-  // clicking on any of the shortURL links will redirect the user to the corresponding longURL in the urlDatabase object
-  const longURL = urlDatabase[req.params.shortURL];
-  res.redirect(longURL);
 });
 
 app.post('/urls/:shortURL', (req, res) => {
