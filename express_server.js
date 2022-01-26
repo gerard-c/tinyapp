@@ -50,6 +50,9 @@ const urlDatabase = {
 // });
 
 app.post('/register', (req, res) => {
+  if (!req.body.email || !req.body.password) {
+    return res.status(400).send('Please enter an email and a password');
+  }
   const randomID = generateRandomString()
   users[randomID] = {
     id: randomID,
