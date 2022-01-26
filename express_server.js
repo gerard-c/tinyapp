@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const res = require('express/lib/response');
 
 const app = express();
 const PORT = 8080; // default
@@ -18,6 +19,15 @@ const generateRandomString = () => {
     output += characters.charAt(Math.floor(Math.random() * characters.length));
   }
   return output;
+};
+
+const emailLookup = (newEmail) => {
+  for (const user in users) {
+    if (users[user].email === newEmail) {
+      return true;
+    }
+  }
+  return false;
 };
 
 const users = {
@@ -38,32 +48,33 @@ const urlDatabase = {
   '9sm5xK': 'http://www.google.com'
 };
 
-// app.post('/login', (req, res) => {
-//   // saves input entry to cookies as 'username'
-//   res.cookie('username', req.body.username);
-//   res.redirect('/urls');
-// });
 
 // app.post('/logout', (req, res) => {
-//   res.clearCookie('user_id');
-//   res.redirect('/register');
-// });
+  //   res.clearCookie('user_id');
+  //   res.redirect('/register');
+  // });
+  
+  app.post('/register', (req, res) => {
+    if (!req.body.email || !req.body.password) {
+      return res.status(400).send('Please enter an email and a password');
+    }
+    if (emailLookup(req.body.email)) {
+      return res.status(400).send('That email is already in use');
+    }
+    const randomID = generateRandomString();
+    users[randomID] = {
+      id: randomID,
+      email: req.body.email,
+      password: req.body.password
+    };
+    res.cookie('user_id', users[randomID]);
+    res.redirect('/urls');
+  });
 
-app.post('/register', (req, res) => {
-  if (!req.body.email || !req.body.password) {
-    return res.status(400).send('Please enter an email and a password');
-  }
-  const randomID = generateRandomString()
-  users[randomID] = {
-    id: randomID,
-    email: req.body.email,
-    password: req.body.password
-  };
-  res.cookie('user_id', users[randomID]);
-  console.log(users);
-  res.redirect('/urls');
-});
-
+  app.get('/login', (req, res) => {
+    res.render('urls_login', { user: users[req.cookies['user_id'].id] });
+  });
+  
 app.get('/urls', (req, res) => {
   // content of urlDatabase to be displayed on /urls
   const templateVars = {
@@ -133,5 +144,4 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 app.listen(PORT, () => {
   // message to console confirming that server is running
   console.log(`Express listening on port ${PORT}!`);
-  console.log(users);
 });
