@@ -1,13 +1,12 @@
 const express = require('express');
-const app = express();
-
 const bodyParser = require('body-parser');
-app.use(bodyParser.urlencoded({ extended: true }));
-
 const cookieParser = require('cookie-parser');
-app.use(cookieParser());
 
+const app = express();
 const PORT = 8080; // default
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.set('view engine', 'ejs');
 
@@ -21,26 +20,51 @@ const generateRandomString = () => {
   return output;
 };
 
+const users = {
+  'userRandomID': {
+    id: 'userRandomID',
+    email: 'user@example.com',
+    password: 'purple-monkey-dinosaur'
+  },
+  'user2RandomID': {
+    id: 'user2RandomID',
+    email: 'user2@example.com',
+    password: 'dishwasher-funk'
+  }
+};
+
 const urlDatabase = {
   'b2xVn2': 'http://www.lighthouselabs.ca',
   '9sm5xK': 'http://www.google.com'
 };
 
-app.post('/login', (req, res) => {
-  // saves input entry to cookies as 'username'
-  res.cookie('username', req.body.username);
-  res.redirect('/urls');
-});
+// app.post('/login', (req, res) => {
+//   // saves input entry to cookies as 'username'
+//   res.cookie('username', req.body.username);
+//   res.redirect('/urls');
+// });
 
-app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+// app.post('/logout', (req, res) => {
+//   res.clearCookie('user_id');
+//   res.redirect('/register');
+// });
+
+app.post('/register', (req, res) => {
+  const randomID = generateRandomString()
+  users[randomID] = {
+    id: randomID,
+    email: req.body.email,
+    password: req.body.password
+  };
+  res.cookie('user_id', users[randomID]);
+  console.log(users);
   res.redirect('/urls');
 });
 
 app.get('/urls', (req, res) => {
   // content of urlDatabase to be displayed on /urls
   const templateVars = {
-    username: req.cookies['username'],
+    user: users[req.cookies['user_id'].id],
     urls: urlDatabase
   };
   res.render('urls_index', templateVars);
@@ -48,8 +72,11 @@ app.get('/urls', (req, res) => {
 
 app.get('/urls/new', (req, res) => {
   // route to page where user can input new URLs to be shortened
-  const templateVars = { username: req.cookies['username'] };
-  res.render('urls_new', templateVars);
+  res.render('urls_new', { user: users[req.cookies['user_id'].id] });
+});
+
+app.get('/register', (req, res) => {
+  res.render('urls_register', { user: users[req.cookies['user_id'].id] });
 });
 
 app.post('/urls', (req, res) => {
@@ -65,19 +92,18 @@ app.post('/urls', (req, res) => {
 
 app.post('/u/:shortURL', (req, res) => {
   // updates existing shortURL with new longURL specified in input field
-  const shortURL = req.params.shortURL;
   let longURL = req.body.newURL;
   if (!longURL.includes('http://')) {
     longURL = 'http://' + longURL;
   }
-  urlDatabase[shortURL] = longURL;
-  res.redirect(`/urls/${shortURL}`);
+  urlDatabase[req.params.shortURL] = longURL;
+  res.redirect(`/urls/${req.params.shortURL}`);
 });
 
 app.get('/urls/:shortURL', (req, res) => {
   // content of /urls and urlDatabase to be used in separate pages of shortened URLs
   const templateVars = {
-    username: req.cookies['username'],
+    user: users[req.cookies['user_id'].id],
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL]
   };
@@ -103,5 +129,6 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 
 app.listen(PORT, () => {
   // message to console confirming that server is running
-  console.log(`tinyApp listening on port ${PORT}!`);
+  console.log(`Express listening on port ${PORT}!`);
+  console.log(users);
 });
