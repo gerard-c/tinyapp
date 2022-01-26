@@ -10,6 +10,8 @@ app.use(cookieParser());
 
 app.set('view engine', 'ejs');
 
+let loggedIn = false;
+
 const generateRandomString = () => {
   // generates 6 "random" alphanumeric characters to function as a shortened URL
   let output = '';
@@ -47,11 +49,6 @@ const urlDatabase = {
   '9sm5xK': 'http://www.google.com'
 };
 
-
-app.get('/login', (req, res) => {
-  res.render('urls_login', { user: users[req.cookies['user_id']] });
-});
-  
 app.get('/urls', (req, res) => {
   // content of urlDatabase to be displayed on /urls
   const templateVars = {
@@ -63,10 +60,23 @@ app.get('/urls', (req, res) => {
 
 app.get('/urls/new', (req, res) => {
   // route to page where user can input new URLs to be shortened
+  if (!loggedIn) {
+    return res.redirect('/login');
+  }
   res.render('urls_new', { user: users[req.cookies['user_id']] });
 });
 
+app.get('/login', (req, res) => {
+  if (loggedIn) {
+    return res.redirect('urls');
+  }
+  res.render('urls_login', { user: users[req.cookies['user_id']] });
+});
+
 app.get('/register', (req, res) => {
+  if (loggedIn) {
+    return res.redirect('urls');
+  }
   res.render('urls_register', { user: users[req.cookies['user_id']] });
 });
 
@@ -88,19 +98,21 @@ app.get('/u/:shortURL', (req, res) => {
 
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
+  loggedIn = false;
   res.redirect('/login');
-}); 
+});
 
 app.post('/login', (req, res) => {
-  let userID = ''
+  let userID = '';
   if (!emailLookup(req.body.email)) {
     return res.status(403).send('There is no user registered to that email address');
   }
   for (const user in users) {
-    console.log(users[user].password, req.body.password)
+    console.log(users[user].password, req.body.password);
     if (users[user].password === req.body.password) {
       userID = users[user].id;
       res.cookie('user_id', users[userID].id);
+      loggedIn = true;
       return res.redirect('/urls');
     }
   }
@@ -121,12 +133,15 @@ app.post('/register', (req, res) => {
     password: req.body.password
   };
   res.cookie('user_id', users[randomID].id);
-  console.log(users[req.cookies['user_id']]);
+  loggedIn = true;
   res.redirect('/urls');
 });
 
 app.post('/urls', (req, res) => {
   // updates urlDatabase to include URL given in form, assigned to a random string as a shortened URL
+  if (!loggedIn) {
+    return res.redirect('/login');
+  }
   const shortURL = generateRandomString();
   let longURL = req.body.longURL;
   if (!longURL.includes('http://')) {
