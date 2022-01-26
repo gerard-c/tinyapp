@@ -7,15 +7,14 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
-const PORT = 8080; // default port for localhost
+const PORT = 8080; // default
 
 app.set('view engine', 'ejs');
 
 const generateRandomString = () => {
-  // function generates "random" series of alphanumeric characters to function as a shortened URL
+  // generates 6 "random" alphanumeric characters to function as a shortened URL
   let output = '';
   const characters = 'aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ0123456789';
-
   for (let i = 0; i < 6; i++) {
     output += characters.charAt(Math.floor(Math.random() * characters.length));
   }
@@ -29,13 +28,11 @@ const urlDatabase = {
 
 app.post('/login', (req, res) => {
   // saves input entry to cookies as 'username'
-  const input = req.body.username;
-  res.cookie('username', input);
+  res.cookie('username', req.body.username);
   res.redirect('/urls');
 });
 
 app.post('/logout', (req, res) => {
-  // clears 'username' cookie
   res.clearCookie('username');
   res.redirect('/urls');
 });
@@ -94,7 +91,7 @@ app.get('/u/:shortURL', (req, res) => {
 });
 
 app.post('/urls/:shortURL', (req, res) => {
-  // when edit button on index page is clicked, redirects to approprite shortURL page
+  // when "edit" button on index is clicked, redirects to approprite shortURL page
   res.redirect(`/urls/${req.params.shortURL}`);
 });
 
