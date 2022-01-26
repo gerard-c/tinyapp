@@ -1,7 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const res = require('express/lib/response');
 
 const app = express();
 const PORT = 8080; // default
@@ -50,30 +49,30 @@ const urlDatabase = {
 
 
 // app.post('/logout', (req, res) => {
-  //   res.clearCookie('user_id');
-  //   res.redirect('/register');
-  // });
+//   res.clearCookie('user_id');
+//   res.redirect('/register');
+// });
   
-  app.post('/register', (req, res) => {
-    if (!req.body.email || !req.body.password) {
-      return res.status(400).send('Please enter an email and a password');
-    }
-    if (emailLookup(req.body.email)) {
-      return res.status(400).send('That email is already in use');
-    }
-    const randomID = generateRandomString();
-    users[randomID] = {
-      id: randomID,
-      email: req.body.email,
-      password: req.body.password
-    };
-    res.cookie('user_id', users[randomID]);
-    res.redirect('/urls');
-  });
+app.post('/register', (req, res) => {
+  if (!req.body.email || !req.body.password) {
+    return res.status(400).send('Please enter an email and a password');
+  }
+  if (emailLookup(req.body.email)) {
+    return res.status(400).send('That email is already in use');
+  }
+  const randomID = generateRandomString();
+  users[randomID] = {
+    id: randomID,
+    email: req.body.email,
+    password: req.body.password
+  };
+  res.cookie('user_id', users[randomID]);
+  res.redirect('/urls');
+});
 
-  app.get('/login', (req, res) => {
-    res.render('urls_login', { user: users[req.cookies['user_id'].id] });
-  });
+app.get('/login', (req, res) => {
+  res.render('urls_login', { user: users[req.cookies['user_id'].id] });
+});
   
 app.get('/urls', (req, res) => {
   // content of urlDatabase to be displayed on /urls

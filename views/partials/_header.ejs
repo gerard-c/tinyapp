@@ -12,10 +12,8 @@
     </div>
     <div>
       <% if (!user) { %>
-        <form action="/login" method="POST">
-          <input name="username" placeholder="Username"></input>
-          <button type="submit" class="btn btn-outline-dark">Login</button>
-        </form>
+          <a href="/login" style="margin: 1em">LOGIN</a>
+          <a href="/register">REGISTER</a>
       <% } else { %>
           <form action="/logout" method="POST">
             <label for="logout">Logged in as: <%= user.email %>!</label>
