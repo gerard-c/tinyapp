@@ -95,17 +95,17 @@ app.get('/urls/new', (req, res) => {
 
 
 // unique page generated for each shortened URL, accessible by anyone
-app.get('/urls/:shortURL', (req, res) => {
+app.get('/urls/:id', (req, res) => {
 
   // iterates through all URLs to access data related to specific shortURL
   for (const url in urlDatabase) {
-    if (req.params.shortURL === url) {
+    if (req.params.id === url) {
 
       // data for relevant shortURL passed to ejs template to be displayed on page
       const templateVars = {
         user: users[req.session['user_id']],
-        shortURL: req.params.shortURL,
-        longURL: urlDatabase[req.params.shortURL].longURL
+        shortURL: req.params.id,
+        longURL: urlDatabase[req.params.id].longURL
       };
 
       return res.render('urls_show', templateVars);
@@ -118,14 +118,14 @@ app.get('/urls/:shortURL', (req, res) => {
 
 
 // links to URL tied to specific shortURL
-app.get('/u/:shortURL', (req, res) => {
+app.get('/u/:id', (req, res) => {
 
   // iterates through all URLs to access data related to specific shortURL
   for (const url in urlDatabase) {
-    if (req.params.shortURL === url) {
+    if (req.params.id === url) {
 
       // URL tied to shortURL assigned to variable
-      const longURL = urlDatabase[req.params.shortURL].longURL;
+      const longURL = urlDatabase[req.params.id].longURL;
 
       // clicking on any of the shortURL links will redirect the user to the corresponding longURL in the urlDatabase object
       // alternatively, being linked to /u/shortURL from elsewhere will immediately redirect to the related longURL
@@ -204,6 +204,7 @@ app.post('/register', (req, res) => {
   res.redirect('/urls');
 });
 
+
 // post triggered by clicking submit on urls/new page
 app.post('/urls', (req, res) => {
 
@@ -231,10 +232,10 @@ app.post('/urls', (req, res) => {
 
 
 // post triggered by clicking submit on urls_show page (next to edit input)
-app.post('/u/:shortURL', (req, res) => {
+app.post('/u/:id', (req, res) => {
 
   // checks if current users URLs include the shortURL shown on the current page
-  if (!Object.keys(urlsForUser(urlDatabase, req.session['user_id'])).includes(req.params.shortURL)) {
+  if (!Object.keys(urlsForUser(urlDatabase, req.session['user_id'])).includes(req.params.id)) {
 
     // error HTML if URL does not belong to current user
     return res.status(403).send('You do not have permission to edit this URL');
@@ -249,35 +250,35 @@ app.post('/u/:shortURL', (req, res) => {
   }
 
   // updates destination of shortened URL to match URL provided in input
-  urlDatabase[req.params.shortURL].longURL = longURL;
+  urlDatabase[req.params.id].longURL = longURL;
 
   // redirects to updated page (effectively a refresh)
-  res.redirect(`/urls/${req.params.shortURL}`);
+  res.redirect(`/urls/${req.params.id}`);
 });
 
 
 // post triggered by clicking edit button on URL index page
-app.post('/urls/:shortURL', (req, res) => {
+app.post('/urls/:id', (req, res) => {
 
   // links to urls_show page of relevant URL
-  res.redirect(`/urls/${req.params.shortURL}`);
+  res.redirect(`/urls/${req.params.id}`);
 });
 
 
 // post triggered by clicking delete button on URL index page
-app.post('/urls/:shortURL/delete', (req, res) => {
+app.post('/urls/:id/delete', (req, res) => {
 
   // checks if current users URLs include the shortURL associated with delete button
   // this may seem redundant as delete buttons cannot be seen by non approved users, but this
   // check prevents page access permissions from being bypassed by APIs
-  if (!Object.keys(urlsForUser(urlDatabase, req.session['user_id'])).includes(req.params.shortURL)) {
+  if (!Object.keys(urlsForUser(urlDatabase, req.session['user_id'])).includes(req.params.id)) {
 
     // appropriately snarky error HTML
     return res.status(403).send('You do not have permission to delete this URL, hackerman');
   }
 
   // deletes target URL from database if permissions pass
-  delete urlDatabase[req.params.shortURL];
+  delete urlDatabase[req.params.id];
 
   // redirects to updated page (effectively a refresh)
   res.redirect('/urls');
