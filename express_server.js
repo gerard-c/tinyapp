@@ -10,8 +10,6 @@ app.use(cookieParser());
 
 app.set('view engine', 'ejs');
 
-let loggedIn = false;
-
 const generateRandomString = () => {
   // generates 6 "random" alphanumeric characters to function as a shortened URL
   let output = '';
@@ -33,7 +31,7 @@ const emailLookup = (targetEmail) => {
 
 const urlsForUser = (id) => {
   const output = {};
-  const compare = Object.keys(urlDatabase)
+  const compare = Object.keys(urlDatabase);
   for (const key of compare) {
     if (urlDatabase[key].userID === id) {
       output[key] = urlDatabase[key].longURL;
@@ -41,7 +39,7 @@ const urlsForUser = (id) => {
   }
   console.log(output);
   return output;
-}
+};
 
 const users = {
   'userRandomID': {
@@ -69,10 +67,10 @@ const urlDatabase = {
 
 app.get('/urls', (req, res) => {
   // content of urlDatabase to be displayed on /urls
-  if (!loggedIn) {
+  if (!req.cookies['user_id']) {
     return res.status(403).send('Login to view URL index');
   }
-  const userURLs = urlsForUser(req.cookies['user_id'])
+  const userURLs = urlsForUser(req.cookies['user_id']);
   const templateVars = {
     user: users[req.cookies['user_id']],
     urls: userURLs
@@ -82,22 +80,21 @@ app.get('/urls', (req, res) => {
 
 app.get('/urls/new', (req, res) => {
   // route to page where user can input new URLs to be shortened
-  if (!loggedIn) {
-    return res.redirect('/login');
+  if (!req.cookies['user_id']) {
+    return res.status(403).send('Login to create new short URLs');
   }
   res.render('urls_new', { user: users[req.cookies['user_id']] });
 });
 
 app.get('/login', (req, res) => {
-  if (loggedIn) {
+  if (req.cookies['user_id']) {
     return res.redirect('urls');
   }
   res.render('urls_login', { user: users[req.cookies['user_id']] });
 });
 
 app.get('/register', (req, res) => {
-  8
-  if (loggedIn) {
+  if (req.cookies['user_id']) {
     return res.redirect('urls');
   }
   res.render('urls_register', { user: users[req.cookies['user_id']] });
@@ -127,7 +124,6 @@ app.get('/u/:shortURL', (req, res) => {
 
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
-  loggedIn = false;
   res.redirect('/login');
 });
 
@@ -141,7 +137,6 @@ app.post('/login', (req, res) => {
     if (users[user].password === req.body.password) {
       userID = users[user].id;
       res.cookie('user_id', users[userID].id);
-      loggedIn = true;
       return res.redirect('/urls');
     }
   }
@@ -162,13 +157,12 @@ app.post('/register', (req, res) => {
     password: req.body.password
   };
   res.cookie('user_id', users[randomID].id);
-  loggedIn = true;
   res.redirect('/urls');
 });
 
 app.post('/urls', (req, res) => {
   // updates urlDatabase to include URL given in form, assigned to a random string as a shortened URL
-  if (!loggedIn) {
+  if (!req.cookies['user_id']) {
     return res.redirect('/login');
   }
   const shortURL = generateRandomString();
@@ -205,7 +199,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   // routes to delete buttons on index page, causing properties to be deleted from urlDatabase
   if (!Object.keys(urlsForUser(req.cookies['user_id'])).includes(req.params.shortURL)) {
     return res.status(403).send('You do not have permission to delete this URL');
-  };
+  }
   delete urlDatabase[req.params.shortURL];
   res.redirect('/urls');
 });
