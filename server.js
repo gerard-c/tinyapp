@@ -271,7 +271,7 @@ app.post('/urls/:id', (req, res) => {
 
 
 // post triggered by clicking delete button on URL index page
-app.post('/urls/:id/delete', (req, res) => {
+app.delete('/urls/:id', (req, res) => {
 
   // checks if current users URLs include the shortURL associated with the delete
   // button. this may seem redundant as delete buttons cannot be seen by non approved
