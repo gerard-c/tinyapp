@@ -4,9 +4,9 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-!["Index table populated by shortened URLs"](/assets/images/myURLs.png)
+!["Index table populated by shortened URLs"](https://github.com/gerard-c/tinyapp/blob/master/docs/urls-index.png?raw=true)
 
-!["Page for a specific shortened URL"](/assets/images/tinyURL.png)
+!["Page for a specific shortened URL"](https://github.com/gerard-c/tinyapp/blob/master/docs/urls-show.png?raw=true)
 
 ## Dependencies
 
