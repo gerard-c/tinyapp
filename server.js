@@ -11,7 +11,7 @@ const { getUserByEmail, generateRandomString, urlsForUser, back } = require('./h
 const app = express(); // shorthand for express functions
 const PORT = 8080; // default
 
-app.use(bodyParser.urlencoded({ extended: true })); // body-parser to provide more detailed information
+app.use(bodyParser.urlencoded({ extended: true })); // enables body-parser to provide more detailed information
 
 // enables cookie-session
 app.use(cookieSession({
@@ -269,9 +269,9 @@ app.post('/urls/:id', (req, res) => {
 // post triggered by clicking delete button on URL index page
 app.post('/urls/:id/delete', (req, res) => {
 
-  // checks if current users URLs include the shortURL associated with delete button
-  // this may seem redundant as delete buttons cannot be seen by non approved users, but this
-  // check prevents page access permissions from being bypassed by APIs
+  // checks if current users URLs include the shortURL associated with the delete
+  // button. this may seem redundant as delete buttons cannot be seen by non approved
+  // users, but this check prevents page access permissions from being bypassed by APIs
   if (!Object.keys(urlsForUser(urlDatabase, req.session['user_id'])).includes(req.params.id)) {
 
     // appropriately snarky error HTML
