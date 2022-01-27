@@ -185,6 +185,9 @@ app.post('/urls', (req, res) => {
 
 app.post('/u/:shortURL', (req, res) => {
   // updates existing shortURL with new longURL specified in input field
+  if (!Object.keys(urlsForUser(req.cookies['user_id'])).includes(req.params.shortURL)) {
+    return res.status(403).send('You do not have permission to edit this URL');
+  }
   let longURL = req.body.newURL;
   if (!longURL.includes('http://')) {
     longURL = 'http://' + longURL;
@@ -200,11 +203,11 @@ app.post('/urls/:shortURL', (req, res) => {
 
 app.post('/urls/:shortURL/delete', (req, res) => {
   // routes to delete buttons on index page, causing properties to be deleted from urlDatabase
-  if (Object.keys(urlsForUser(req.cookies['user_id'])).includes(req.params.shortURL)) {
-    delete urlDatabase[req.params.shortURL];
-    return res.redirect('/urls');
+  if (!Object.keys(urlsForUser(req.cookies['user_id'])).includes(req.params.shortURL)) {
+    return res.status(403).send('You do not have permission to delete this URL');
   };
-  res.status(403).send('You do not have permission to delete this URL');
+  delete urlDatabase[req.params.shortURL];
+  res.redirect('/urls');
 });
 
 app.listen(PORT, () => {
