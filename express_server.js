@@ -72,7 +72,7 @@ app.get('/urls/:shortURL', (req, res) => {
 
 app.get('/u/:shortURL', (req, res) => {
   // clicking on any of the shortURL links will redirect the user to the corresponding longURL in the urlDatabase object
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 
