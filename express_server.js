@@ -13,6 +13,10 @@ app.use(cookieParser());
 
 app.set('view engine', 'ejs');
 
+// *-*-*-*-*-*-*-*-*-*-*-*-*-*
+// *-*-*-* GET ROUTES  *-*-*-*
+// *-*-*-*-*-*-*-*-*-*-*-*-*-*
+
 app.get('/urls', (req, res) => {
   // content of urlDatabase to be displayed on /urls
   if (!req.cookies['user_id']) {
@@ -69,6 +73,10 @@ app.get('/u/:shortURL', (req, res) => {
   res.redirect(longURL);
 });
 
+// *-*-*-*-*-*-*-*-*-*-*-*-*-*
+// *-*-*-* POST ROUTES *-*-*-*
+// *-*-*-*-*-*-*-*-*-*-*-*-*-*
+
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
   res.redirect('/login');
@@ -82,7 +90,7 @@ app.post('/login', (req, res) => {
   if (!emailLookup(users, req.body.email)) {
     return res.status(403).send('There is no user registered to that email address' + back('/login'));
   }
-  
+
   for (const user in users) {
     if (bcrypt.compareSync(req.body.password, users[user].password)) {
       res.cookie('user_id', users[user].id);
