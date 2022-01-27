@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
+// const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 const { urlDatabase, users } = require('./database');
 const { emailLookup, generateRandomString, urlsForUser, back } = require('./functions');
@@ -9,7 +10,11 @@ const app = express();
 const PORT = 8080; // default
 
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ['secret-key1', 'secret-key2', 'secret-key3']
+}))
+// app.use(cookieParser());
 
 app.set('view engine', 'ejs');
 
