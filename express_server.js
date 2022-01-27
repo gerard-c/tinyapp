@@ -45,8 +45,14 @@ const users = {
 };
 
 const urlDatabase = {
-  'b2xVn2': 'http://www.lighthouselabs.ca',
-  '9sm5xK': 'http://www.google.com'
+  b6UTxQ: {
+      longURL: "https://www.tsn.ca",
+      userID: "userRandomID"
+  },
+  i3BoGr: {
+      longURL: "https://www.google.ca",
+      userID: "user2RandomID"
+  }
 };
 
 app.get('/urls', (req, res) => {
@@ -85,7 +91,7 @@ app.get('/urls/:shortURL', (req, res) => {
   const templateVars = {
     user: users[req.cookies['user_id']],
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL]
+    longURL: urlDatabase[req.params.shortURL].longURL
   };
   res.render('urls_show', templateVars);
 });
@@ -147,7 +153,10 @@ app.post('/urls', (req, res) => {
   if (!longURL.includes('http://')) {
     longURL = 'http://' + longURL;
   }
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL] = {
+    longURL: longURL,
+    userID: req.cookies['user_id']
+  };
   res.redirect(`/urls/${shortURL}`);
 });
 
