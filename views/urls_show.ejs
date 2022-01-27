@@ -21,7 +21,7 @@
     <div class="card-footer text-muted">
       <h1>Edit</h1>
       <!--form to manage usage of editing input-->
-      <form action="/u/<%= shortURL %>" method="POST">
+      <form action="/u/<%= shortURL %>?_method=PUT" method="POST">
         <label for="newURL">New URL:</label>
         <input name="newURL" placeholder="http://"></input>
         <button type="submit" class="btn btn-primary">Submit</button>

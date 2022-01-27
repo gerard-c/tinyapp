@@ -236,8 +236,8 @@ app.post('/urls', (req, res) => {
 });
 
 
-// post triggered by clicking submit on urls_show page (next to edit input)
-app.post('/u/:id', (req, res) => {
+// put triggered by clicking submit on urls_show page (next to edit input)
+app.put('/u/:id', (req, res) => {
 
   // checks if current users URLs include the shortURL shown on the current page
   if (!Object.keys(urlsForUser(urlDatabase, req.session['user_id'])).includes(req.params.id)) {
@@ -270,7 +270,7 @@ app.post('/urls/:id', (req, res) => {
 });
 
 
-// post triggered by clicking delete button on URL index page
+// delete triggered by clicking delete button on URL index page
 app.delete('/urls/:id', (req, res) => {
 
   // checks if current users URLs include the shortURL associated with the delete
