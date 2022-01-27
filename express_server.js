@@ -1,6 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const { urlDatabase, users } = require('./database');
+const { emailLookup, generateRandomString, urlsForUser, back } = require('./functions');
 
 const app = express();
 const PORT = 8080; // default
@@ -10,67 +12,13 @@ app.use(cookieParser());
 
 app.set('view engine', 'ejs');
 
-const generateRandomString = () => {
-  // generates 6 "random" alphanumeric characters to function as a shortened URL
-  let output = '';
-  const characters = 'aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ0123456789';
-  for (let i = 0; i < 6; i++) {
-    output += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return output;
-};
-
-const emailLookup = (targetEmail) => {
-  for (const user in users) {
-    if (users[user].email === targetEmail) {
-      return true;
-    }
-  }
-  return false;
-};
-
-const urlsForUser = (id) => {
-  const output = {};
-  const compare = Object.keys(urlDatabase);
-  for (const key of compare) {
-    if (urlDatabase[key].userID === id) {
-      output[key] = urlDatabase[key].longURL;
-    }
-  }
-  console.log(output);
-  return output;
-};
-
-const users = {
-  'userRandomID': {
-    id: 'userRandomID',
-    email: 'user@example.com',
-    password: 'purple-monkey-dinosaur'
-  },
-  'user2RandomID': {
-    id: 'user2RandomID',
-    email: 'user2@example.com',
-    password: 'dishwasher-funk'
-  }
-};
-
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "userRandomID"
-  },
-  sgq3y6: {
-    longURL: "https://www.google.ca",
-    userID: "user2RandomID"
-  }
-};
-
 app.get('/urls', (req, res) => {
   // content of urlDatabase to be displayed on /urls
   if (!req.cookies['user_id']) {
-    return res.status(403).send('Login to view URL index');
+    return res.status(403)
+      .send('<a href="/login">Login</a> or <a href="/register">Register</a> to view URL index');
   }
-  const userURLs = urlsForUser(req.cookies['user_id']);
+  const userURLs = urlsForUser(urlDatabase, req.cookies['user_id']);
   const templateVars = {
     user: users[req.cookies['user_id']],
     urls: userURLs
@@ -81,7 +29,7 @@ app.get('/urls', (req, res) => {
 app.get('/urls/new', (req, res) => {
   // route to page where user can input new URLs to be shortened
   if (!req.cookies['user_id']) {
-    return res.status(403).send('Login to create new short URLs');
+    return res.status(403).send('<a href="/login">Login</a> or <a href="/register">Register</a> to shorten new URLs');
   }
   res.render('urls_new', { user: users[req.cookies['user_id']] });
 });
@@ -103,7 +51,6 @@ app.get('/register', (req, res) => {
 app.get('/urls/:shortURL', (req, res) => {
   // content of /urls and urlDatabase to be used in separate pages of shortened URLs
   for (const url in urlDatabase) {
-    console.log(req.params.shortURL, url);
     if (req.params.shortURL === url) {
       const templateVars = {
         user: users[req.cookies['user_id']],
@@ -128,27 +75,27 @@ app.post('/logout', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  let userID = '';
-  if (!emailLookup(req.body.email)) {
-    return res.status(403).send('There is no user registered to that email address');
+  if (!req.body.email || !req.body.password) {
+    return res.status(400).send('Please enter an email and a password' + back('/login'));
+  }
+  if (!emailLookup(users, req.body.email)) {
+    return res.status(403).send('There is no user registered to that email address' + back('/login'));
   }
   for (const user in users) {
-    console.log(users[user].password, req.body.password);
     if (users[user].password === req.body.password) {
-      userID = users[user].id;
-      res.cookie('user_id', users[userID].id);
+      res.cookie('user_id', users[user].id);
       return res.redirect('/urls');
     }
   }
-  return res.status(403).send('Incorrect password');
+  return res.status(403).send('Incorrect password' + back('/login'));
 });
 
 app.post('/register', (req, res) => {
   if (!req.body.email || !req.body.password) {
-    return res.status(400).send('Please enter an email and a password');
+    return res.status(400).send('Please enter an email and a password' + back('/register'));
   }
-  if (emailLookup(req.body.email)) {
-    return res.status(400).send('That email is already in use');
+  if (emailLookup(users, req.body.email)) {
+    return res.status(400).send('That email is already in use' + back('/register'));
   }
   const randomID = generateRandomString();
   users[randomID] = {
@@ -179,7 +126,7 @@ app.post('/urls', (req, res) => {
 
 app.post('/u/:shortURL', (req, res) => {
   // updates existing shortURL with new longURL specified in input field
-  if (!Object.keys(urlsForUser(req.cookies['user_id'])).includes(req.params.shortURL)) {
+  if (!Object.keys(urlsForUser(urlDatabase, req.cookies['user_id'])).includes(req.params.shortURL)) {
     return res.status(403).send('You do not have permission to edit this URL');
   }
   let longURL = req.body.newURL;
@@ -197,8 +144,8 @@ app.post('/urls/:shortURL', (req, res) => {
 
 app.post('/urls/:shortURL/delete', (req, res) => {
   // routes to delete buttons on index page, causing properties to be deleted from urlDatabase
-  if (!Object.keys(urlsForUser(req.cookies['user_id'])).includes(req.params.shortURL)) {
-    return res.status(403).send('You do not have permission to delete this URL');
+  if (!Object.keys(urlsForUser(urlDatabase, req.cookies['user_id'])).includes(req.params.shortURL)) {
+    return res.status(403).send('You do not have permission to delete this URL' + back('/urls'));
   }
   delete urlDatabase[req.params.shortURL];
   res.redirect('/urls');
