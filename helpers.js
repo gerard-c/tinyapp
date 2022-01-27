@@ -7,6 +7,7 @@ const back = (route) => {
 // checks user emails against target email and returns true or false
 const getUserByEmail = (data, targetEmail) => {
 
+  // iterates through database comparing values of email keys to target email
   for (const user in data) {
     if (data[user].email === targetEmail) {
       return true;
@@ -32,11 +33,16 @@ const generateRandomString = () => {
 };
 
 
-// sorts through urls and returns only those made by the specified by user
+// sorts through urls and returns only those made by the specified user
 const urlsForUser = (data, id) => {
   const output = {};
+  
+  //creates array containing the ID strings of database
   const compare = Object.keys(data);
   for (const key of compare) {
+
+    // if the user ID of a shortened URL matches the provided ID,
+    // are added to the output object as { shortURL: longURL }
     if (data[key].userID === id) {
       output[key] = data[key].longURL;
     }

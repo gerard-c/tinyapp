@@ -1,7 +1,7 @@
 // NPM packages required by app
 const express = require('express'); // handles http
 const bodyParser = require('body-parser'); // used to read body of http in detail
-const cookieSession = require('cookie-session'); // cookie-handling facilitating secure cookies
+const cookieSession = require('cookie-session'); // cookie-handling which facilitates secure cookies
 const bcrypt = require('bcryptjs'); // used to hash passwords for security
 
 // separate files to handle data and functions, saving space in server file
@@ -41,6 +41,7 @@ app.get('/login', (req, res) => {
   if (req.session['user_id']) {
     return res.redirect('/urls');
   }
+
   res.render('urls_login', { user: users[req.session['user_id']] });
 });
 
@@ -129,7 +130,7 @@ app.get('/u/:id', (req, res) => {
 
       // clicking on any of the shortURL links will redirect the user to the corresponding longURL in the urlDatabase object
       // alternatively, being linked to /u/shortURL from elsewhere will immediately redirect to the related longURL
-      res.redirect(longURL);
+      return res.redirect(longURL);
     }
   }
 
@@ -148,7 +149,7 @@ app.post('/logout', (req, res) => {
 
   // clears user cookies and redirects user to login page
   req.session['user_id'] = null;
-  res.redirect('/login');
+  res.redirect('/urls');
 });
 
 
@@ -199,7 +200,7 @@ app.post('/register', (req, res) => {
     password: bcrypt.hashSync(req.body.password, 10) // provided password is hashed for security
   };
 
-  // automatically logs new user in by saving (encrypted) id string to cookies
+  // automatically logs new user in by saving (encrypted) ID string to cookies
   req.session['user_id'] = users[randomID].id;
   res.redirect('/urls');
 });
