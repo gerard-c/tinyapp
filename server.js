@@ -1,5 +1,6 @@
 // NPM packages required by app
 const express = require('express'); // handles http
+const methodOverride = require('method-override'); // simulates methods beyond GET and POST
 const bodyParser = require('body-parser'); // used to read body of http in detail
 const cookieSession = require('cookie-session'); // cookie-handling which facilitates secure cookies
 const bcrypt = require('bcryptjs'); // used to hash passwords for security
@@ -10,6 +11,8 @@ const { getUserByEmail, generateRandomString, urlsForUser, back } = require('./h
 
 const app = express(); // shorthand for express functions
 const PORT = 8080; // default
+
+app.use(methodOverride('X-HTTP-Method-Override')); // uuuhhhhh...
 
 app.use(bodyParser.urlencoded({ extended: true })); // enables body-parser to provide more detailed information
 
