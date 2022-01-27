@@ -46,17 +46,20 @@ const users = {
 
 const urlDatabase = {
   b6UTxQ: {
-      longURL: "https://www.tsn.ca",
-      userID: "userRandomID"
+    longURL: "https://www.tsn.ca",
+    userID: "userRandomID"
   },
   i3BoGr: {
-      longURL: "https://www.google.ca",
-      userID: "user2RandomID"
+    longURL: "https://www.google.ca",
+    userID: "user2RandomID"
   }
 };
 
 app.get('/urls', (req, res) => {
   // content of urlDatabase to be displayed on /urls
+  if (!loggedIn) {
+    return res.status(403).send('Login to view URL index');
+  }
   const templateVars = {
     user: users[req.cookies['user_id']],
     urls: urlDatabase
@@ -80,6 +83,7 @@ app.get('/login', (req, res) => {
 });
 
 app.get('/register', (req, res) => {
+  8
   if (loggedIn) {
     return res.redirect('urls');
   }
@@ -88,12 +92,18 @@ app.get('/register', (req, res) => {
 
 app.get('/urls/:shortURL', (req, res) => {
   // content of /urls and urlDatabase to be used in separate pages of shortened URLs
-  const templateVars = {
-    user: users[req.cookies['user_id']],
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL].longURL
-  };
-  res.render('urls_show', templateVars);
+  for (const url in urlDatabase) {
+    console.log(req.params.shortURL, url);
+    if (req.params.shortURL === url) {
+      const templateVars = {
+        user: users[req.cookies['user_id']],
+        shortURL: req.params.shortURL,
+        longURL: urlDatabase[req.params.shortURL].longURL
+      };
+      return res.render('urls_show', templateVars);
+    }
+  }
+  res.status(404).send('Specified page cannot be found');
 });
 
 app.get('/u/:shortURL', (req, res) => {
@@ -124,7 +134,7 @@ app.post('/login', (req, res) => {
   }
   return res.status(403).send('Incorrect password');
 });
-  
+
 app.post('/register', (req, res) => {
   if (!req.body.email || !req.body.password) {
     return res.status(400).send('Please enter an email and a password');
@@ -166,7 +176,7 @@ app.post('/u/:shortURL', (req, res) => {
   if (!longURL.includes('http://')) {
     longURL = 'http://' + longURL;
   }
-  urlDatabase[req.params.shortURL] = longURL;
+  urlDatabase[req.params.shortURL].longURL = longURL;
   res.redirect(`/urls/${req.params.shortURL}`);
 });
 
