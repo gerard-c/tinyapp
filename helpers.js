@@ -3,8 +3,10 @@ const back = (route) => {
   return `<br><a href="${route}">BACK</a>`;
 }
 
+
 // checks user emails against target email and returns true or false
-const emailLookup = (data, targetEmail) => {
+const getUserByEmail = (data, targetEmail) => {
+
   for (const user in data) {
     if (data[user].email === targetEmail) {
       return true;
@@ -13,15 +15,22 @@ const emailLookup = (data, targetEmail) => {
   return false;
 };
 
+
 // generates 6 "random" alphanumeric characters to function as a shortened URL or user ID
 const generateRandomString = () => {
-  let output = '';
+  let output = ''; // output starts as empty string
+
+  //all possible characters that may be added to output
   const characters = 'aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ0123456789';
-  for (let i = 0; i < 6; i++) {
+
+  for (let i = 0; i < 6; i++) { // loop will run 6 times to make 6 characters
+
+    // each loop will pick a character at random and add it to the output
     output += characters.charAt(Math.floor(Math.random() * characters.length));
   }
   return output;
 };
+
 
 // sorts through urls and returns only those made by the specified by user
 const urlsForUser = (data, id) => {
@@ -35,9 +44,10 @@ const urlsForUser = (data, id) => {
   return output;
 };
 
+
 module.exports = {
   back,
-  emailLookup,
+  getUserByEmail,
   generateRandomString,
   urlsForUser
 }

@@ -1,25 +1,13 @@
+// empty databases to be used by server
+
 const users = {
-  'userRandomID': {
-    id: 'userRandomID',
-    email: 'user@example.com',
-    password: 'purple-monkey-dinosaur'
-  },
-  'user2RandomID': {
-    id: 'user2RandomID',
-    email: 'user2@example.com',
-    password: 'dishwasher-funk'
-  }
+
 };
 
+
 const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "userRandomID"
-  },
-  sgq3y6: {
-    longURL: "https://www.google.ca",
-    userID: "user2RandomID"
-  }
+
 };
+
 
 module.exports = { urlDatabase, users }
