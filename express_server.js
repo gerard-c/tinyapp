@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 const { urlDatabase, users } = require('./database');
-const { emailLookup, generateRandomString, urlsForUser, back } = require('./functions');
+const { emailLookup, generateRandomString, urlsForUser, back } = require('./helpers');
 
 const app = express();
 const PORT = 8080; // default
