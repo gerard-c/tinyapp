@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcryptjs');
 const { urlDatabase, users } = require('./database');
 const { emailLookup, generateRandomString, urlsForUser, back } = require('./functions');
 
@@ -15,8 +16,7 @@ app.set('view engine', 'ejs');
 app.get('/urls', (req, res) => {
   // content of urlDatabase to be displayed on /urls
   if (!req.cookies['user_id']) {
-    return res.status(403)
-      .send('<a href="/login">Login</a> or <a href="/register">Register</a> to view URL index');
+    return res.status(403).send('<a href="/login">Login</a> or <a href="/register">Register</a> to view URL index');
   }
   const userURLs = urlsForUser(urlDatabase, req.cookies['user_id']);
   const templateVars = {
@@ -98,11 +98,13 @@ app.post('/register', (req, res) => {
     return res.status(400).send('That email is already in use' + back('/register'));
   }
   const randomID = generateRandomString();
+  const hashedPassword = bcrypt.hashSync(req.body.password, 10);
   users[randomID] = {
     id: randomID,
     email: req.body.email,
-    password: req.body.password
+    password: hashedPassword
   };
+  console.log(users[randomID]);
   res.cookie('user_id', users[randomID].id);
   res.redirect('/urls');
 });
