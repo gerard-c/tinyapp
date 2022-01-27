@@ -11,10 +11,12 @@
       </div>
     </div>
     <div>
+      <!--if user cookie data is not found, header includes links to login and register pages-->
       <% if (!user) { %>
           <a href="/login" style="margin: 1em">LOGIN</a>
           <a href="/register">REGISTER</a>
       <% } else { %>
+        <!--if user cookie data is found, header includes the user's email and a logout button-->
           <form action="/logout" method="POST">
             <label for="logout" style="margin: 1em;">Logged in as: <%= user.email %>!</label>
             <button type="submit" name="logout" class="btn btn-outline-dark">Logout</button>

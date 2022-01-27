@@ -12,10 +12,11 @@
 </head>
 
 <body>
+  <!--header is added to every page-->
   <%- include('partials/_header') %>
-
   <main style="margin: 1em;">
     <h3>User Login</h3>
+    <!--form to manage email and password inputs for user login-->
     <form action="/login" method="POST">
         <label for="email">Email: </label>
         <input class="form-control" type="email" name="email" style="width: 300px">
@@ -23,7 +24,6 @@
         <input class="form-control" type="password" name="password" style="width: 300px;">
       <button type="submit" class="btn btn-primary" style="margin-top: 1em">Login</button>
     </form>
-
   </main>
 
   <!-- Bootstrap JS -->
