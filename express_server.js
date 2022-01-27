@@ -78,11 +78,13 @@ app.post('/login', (req, res) => {
   if (!req.body.email || !req.body.password) {
     return res.status(400).send('Please enter an email and a password' + back('/login'));
   }
+
   if (!emailLookup(users, req.body.email)) {
     return res.status(403).send('There is no user registered to that email address' + back('/login'));
   }
+  
   for (const user in users) {
-    if (users[user].password === req.body.password) {
+    if (bcrypt.compareSync(req.body.password, users[user].password)) {
       res.cookie('user_id', users[user].id);
       return res.redirect('/urls');
     }
@@ -94,17 +96,20 @@ app.post('/register', (req, res) => {
   if (!req.body.email || !req.body.password) {
     return res.status(400).send('Please enter an email and a password' + back('/register'));
   }
+
   if (emailLookup(users, req.body.email)) {
     return res.status(400).send('That email is already in use' + back('/register'));
   }
+
   const randomID = generateRandomString();
   const hashedPassword = bcrypt.hashSync(req.body.password, 10);
+
   users[randomID] = {
     id: randomID,
     email: req.body.email,
     password: hashedPassword
   };
-  console.log(users[randomID]);
+
   res.cookie('user_id', users[randomID].id);
   res.redirect('/urls');
 });
