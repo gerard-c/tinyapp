@@ -31,6 +31,28 @@ const emailLookup = (targetEmail) => {
   return false;
 };
 
+// const urlsForUser = (id) => {
+//   const output = {};
+//   for (const url in urlDatabase) {
+//     if (urlDatabase[url].userID === id) {
+//       output[urlDatabase[url]] = urlDatabase[url].longURL;
+//     }
+//   }
+//   console.log(output);
+//   return output;
+// };
+
+const urlsForUser = (id) => {
+  const output = {};
+  const compare = Object.keys(urlDatabase)
+  for (const key of compare) {
+    if (urlDatabase[key].userID === id) {
+      output[key] = urlDatabase[key].longURL;
+    }
+  }
+  return output;
+}
+
 const users = {
   'userRandomID': {
     id: 'userRandomID',
@@ -60,9 +82,10 @@ app.get('/urls', (req, res) => {
   if (!loggedIn) {
     return res.status(403).send('Login to view URL index');
   }
+  const userURLs = urlsForUser(req.cookies['user_id'])
   const templateVars = {
     user: users[req.cookies['user_id']],
-    urls: urlDatabase
+    urls: userURLs
   };
   res.render('urls_index', templateVars);
 });
