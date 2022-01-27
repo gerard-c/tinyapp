@@ -31,17 +31,6 @@ const emailLookup = (targetEmail) => {
   return false;
 };
 
-// const urlsForUser = (id) => {
-//   const output = {};
-//   for (const url in urlDatabase) {
-//     if (urlDatabase[url].userID === id) {
-//       output[urlDatabase[url]] = urlDatabase[url].longURL;
-//     }
-//   }
-//   console.log(output);
-//   return output;
-// };
-
 const urlsForUser = (id) => {
   const output = {};
   const compare = Object.keys(urlDatabase)
@@ -50,6 +39,7 @@ const urlsForUser = (id) => {
       output[key] = urlDatabase[key].longURL;
     }
   }
+  console.log(output);
   return output;
 }
 
@@ -71,7 +61,7 @@ const urlDatabase = {
     longURL: "https://www.tsn.ca",
     userID: "userRandomID"
   },
-  i3BoGr: {
+  sgq3y6: {
     longURL: "https://www.google.ca",
     userID: "user2RandomID"
   }
@@ -210,8 +200,11 @@ app.post('/urls/:shortURL', (req, res) => {
 
 app.post('/urls/:shortURL/delete', (req, res) => {
   // routes to delete buttons on index page, causing properties to be deleted from urlDatabase
-  delete urlDatabase[req.params.shortURL];
-  res.redirect('/urls');
+  if (Object.keys(urlsForUser(req.cookies['user_id'])).includes(req.params.shortURL)) {
+    delete urlDatabase[req.params.shortURL];
+    return res.redirect('/urls');
+  };
+  res.status(403).send('You do not have permission to delete this URL');
 });
 
 app.listen(PORT, () => {
