@@ -120,12 +120,21 @@ app.get('/urls/:shortURL', (req, res) => {
 // links to URL tied to specific shortURL
 app.get('/u/:shortURL', (req, res) => {
 
-  // URL tied to shortURL assigned to variable
-  const longURL = urlDatabase[req.params.shortURL].longURL;
+  // iterates through all URLs to access data related to specific shortURL
+  for (const url in urlDatabase) {
+    if (req.params.shortURL === url) {
 
-  // clicking on any of the shortURL links will redirect the user to the corresponding longURL in the urlDatabase object
-  // alternatively, being linked to /u/shortURL from elsewhere will immediately redirect to the related longURL
-  res.redirect(longURL);
+      // URL tied to shortURL assigned to variable
+      const longURL = urlDatabase[req.params.shortURL].longURL;
+
+      // clicking on any of the shortURL links will redirect the user to the corresponding longURL in the urlDatabase object
+      // alternatively, being linked to /u/shortURL from elsewhere will immediately redirect to the related longURL
+      res.redirect(longURL);
+    }
+  }
+
+  // error HTML is specified shortURL cannot be found in database
+  res.status(404).send('Specified page cannot be found');
 });
 
 
