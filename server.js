@@ -12,7 +12,8 @@ const { getUserByEmail, generateRandomString, urlsForUser, back } = require('./h
 const app = express(); // shorthand for express functions
 const PORT = 8080; // default
 
-app.use(methodOverride('X-HTTP-Method-Override')); // uuuhhhhh...
+// _method is used in HTML form actions to use otherwise unavailable methods
+app.use(methodOverride('_method'));
 
 app.use(bodyParser.urlencoded({ extended: true })); // enables body-parser to provide more detailed information
 
