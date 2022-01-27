@@ -110,8 +110,11 @@ app.get('/urls/:id', (req, res) => {
       const templateVars = {
         user: users[req.session['user_id']],
         shortURL: req.params.id,
-        longURL: urlDatabase[req.params.id].longURL
+        longURL: urlDatabase[req.params.id].longURL,
+        visitCount: urlDatabase[req.params.id].visitCount
       };
+
+      urlDatabase[req.params.id].visitCount++;
 
       return res.render('urls_show', templateVars);
     }
@@ -228,7 +231,8 @@ app.post('/urls', (req, res) => {
   // URL added to database under random ID generated earlier
   urlDatabase[shortURL] = {
     longURL: longURL,
-    userID: req.session['user_id'] // user ID saved to cookies assigned to URL object to determine ownership
+    userID: req.session['user_id'], // user ID saved to cookies assigned to URL object to determine ownership
+    visitCount: 0
   };
 
   // redirects to urls_show page for newly created shortURL
