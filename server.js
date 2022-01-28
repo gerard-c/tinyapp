@@ -38,37 +38,37 @@ let loggedIn = false;
 
 
 // ***** NOTE *****
-// Most get routes pass user cookie data to their appropriate
-// ejs templates in order to determine what is shown on the
-// persistent header. More info on /views/partials/_header.ejs
+// Most get routes pass user cookie data and the "loggedIn variable
+// to their appropriate ejs templates in order to determine what is shown
+// on the persistent header. More info on /views/partials/_header.ejs
 
 
 // login page with email and password inputs
 app.get('/login', (req, res) => {
 
-  if (req.session['user_id']) {
+  if (req.session['user_id'] || loggedIn) {
     return res.redirect('/urls');
   }
 
-  res.render('urls_login', { user: users[req.session['user_id']] });
+  res.render('urls_login', { user: users[req.session['user_id']], loggedIn : loggedIn });
 });
 
 
 // registration page with email and password inputs
 app.get('/register', (req, res) => {
 
-  if (req.session['user_id']) {
+  if (req.session['user_id'] || loggedIn) {
     return res.redirect('/urls');
   }
 
-  res.render('urls_register', { user: users[req.session['user_id']] });
+  res.render('urls_register', { user: users[req.session['user_id']], loggedIn : loggedIn });
 });
 
 
 // user appropriate content of urlDatabase to be displayed on /urls
 app.get('/urls', (req, res) => {
 
-  if (!req.session['user_id'] || loggedIn === false) {
+  if (!req.session['user_id'] || !loggedIn) {
 
     req.session['user_id'] = null;
 
@@ -80,7 +80,9 @@ app.get('/urls', (req, res) => {
   
   const templateVars = {
     user: users[req.session['user_id']],
+    loggedIn : loggedIn,
     urls: userURLs
+    
   };
 
   res.render('urls_index', templateVars);
@@ -90,21 +92,21 @@ app.get('/urls', (req, res) => {
 // user may input new URLs to be shortened on /urls/new
 app.get('/urls/new', (req, res) => {
 
-  if (!req.session['user_id'] || loggedIn === false) {
+  if (!req.session['user_id'] || !loggedIn) {
 
     req.session['user_id'] = null;
 
-    return res.status(403).send('<a href="/login">Login</a> or <a href="/register">Register</a> to shorten new URLs');
+    return res.redirect('/login');
   }
 
-  res.render('urls_new', { user: users[req.session['user_id']] });
+  res.render('urls_new', { user: users[req.session['user_id']], loggedIn : loggedIn });
 });
 
 
 // unique page generated for each shortened URL
 app.get('/urls/:id', (req, res) => {
 
-  if (!req.session['user_id'] || loggedIn === false) {
+  if (!req.session['user_id'] || !loggedIn) {
 
     req.session['user_id'] = null;
 
@@ -118,6 +120,7 @@ app.get('/urls/:id', (req, res) => {
 
       const templateVars = {
         user: users[req.session['user_id']],
+        loggedIn : loggedIn,
         shortURL: req.params.id,
         longURL: url.longURL,
         visitCount: url.visitCount,
