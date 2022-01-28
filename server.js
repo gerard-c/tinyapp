@@ -1,5 +1,6 @@
 // NPM packages required by app
 const express = require('express'); // handles http
+const morgan = require('morgan'); //useful troubleshooting tool
 const methodOverride = require('method-override'); // simulates methods beyond GET and POST
 const bodyParser = require('body-parser'); // used to read body of http in detail
 const cookieSession = require('cookie-session'); // cookie-handling which facilitates secure cookies
@@ -14,6 +15,8 @@ const PORT = 8080; // default
 
 // _method is used in HTML form actions to use otherwise unavailable methods
 app.use(methodOverride('_method'));
+
+app.use(morgan('short'));
 
 app.use(bodyParser.urlencoded({ extended: true })); // enables body-parser to provide more detailed information
 
@@ -114,8 +117,6 @@ app.get('/urls/:id', (req, res) => {
         visitCount: urlDatabase[req.params.id].visitCount
       };
 
-      urlDatabase[req.params.id].visitCount++;
-
       return res.render('urls_show', templateVars);
     }
   }
@@ -134,6 +135,9 @@ app.get('/u/:id', (req, res) => {
 
       // URL tied to shortURL assigned to variable
       const longURL = urlDatabase[req.params.id].longURL;
+
+      // increments appropriate URL's visit count when link is accessed
+      urlDatabase[req.params.id].visitCount++;
 
       // clicking on any of the shortURL links will redirect the user to the corresponding longURL in the urlDatabase object
       // alternatively, being linked to /u/shortURL from elsewhere will immediately redirect to the related longURL
@@ -257,6 +261,9 @@ app.put('/u/:id', (req, res) => {
   if (!longURL.includes('http://')) {
     longURL = 'http://' + longURL;
   }
+
+  // view count goes back down to 0 when destination is changed
+  urlDatabase[req.params.id].visitCount = 0;
 
   // updates destination of shortened URL to match URL provided in input
   urlDatabase[req.params.id].longURL = longURL;

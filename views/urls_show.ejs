@@ -16,7 +16,8 @@
     <div class="card-body">
       <h5 class="card-title">TinyURL for: <%= longURL %></h5>
       <!--specific shortURL links to full length URL it is associated with-->
-      <p class="card-text">Short URL: <a href="<%= longURL %>"><%= shortURL %></a></p>
+      <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
+      <p class="card-text">Visits: <%= visitCount %></p>
     </div>
     <div class="card-footer text-muted">
       <h1>Edit</h1>
