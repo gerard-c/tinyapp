@@ -8,7 +8,7 @@ const bcrypt = require('bcryptjs'); // used to hash passwords for security
 
 // separate files to handle data and functions, saving space in server file
 const { urlDatabase, users } = require('./database'); // databases accessed by server
-const { getUserByEmail, generateRandomString, urlsForUser, back } = require('./helpers'); // helper functions
+const { getUserByEmail, generateRandomString, urlsForUser, generateGoBackHtml } = require('./helpers'); // helper functions
 
 const app = express(); // shorthand for express functions
 const PORT = 8080; // default
@@ -29,6 +29,8 @@ app.use(cookieSession({
 // allows server to interact with logic on ejs templates
 app.set('view engine', 'ejs');
 
+let loggedIn = false;
+
 
 // *-*-*-*-*-*-*-*-*-*-*-*-*-*
 // *-*-*-* GET ROUTES  *-*-*-*
@@ -36,7 +38,7 @@ app.set('view engine', 'ejs');
 
 
 // ***** NOTE *****
-// All get routes pass user cookie data to their appropriate
+// Most get routes pass user cookie data to their appropriate
 // ejs templates in order to determine what is shown on the
 // persistent header. More info on /views/partials/_header.ejs
 
@@ -44,7 +46,6 @@ app.set('view engine', 'ejs');
 // login page with email and password inputs
 app.get('/login', (req, res) => {
 
-  // if cookies are set (user is signed in), user is redirected to index on /urls
   if (req.session['user_id']) {
     return res.redirect('/urls');
   }
@@ -56,7 +57,6 @@ app.get('/login', (req, res) => {
 // registration page with email and password inputs
 app.get('/register', (req, res) => {
 
-  // if cookies are set (user is signed in), user is redirected to index on /urls
   if (req.session['user_id']) {
     return res.redirect('/urls');
   }
@@ -68,17 +68,16 @@ app.get('/register', (req, res) => {
 // user appropriate content of urlDatabase to be displayed on /urls
 app.get('/urls', (req, res) => {
 
-  // if cookies are not set (user isn't signed in), user is sent an error message prompting them to register or login
-  if (!req.session['user_id']) {
+  if (!req.session['user_id'] || loggedIn === false) {
 
-    // error HTML contains links to /login and /register
+    req.session['user_id'] = null;
+
     return res.status(403).send('<a href="/login">Login</a> or <a href="/register">Register</a> to view URL index');
   }
 
   // urls in database associated with user assigned to a variable
   const userURLs = urlsForUser(urlDatabase, req.session['user_id']);
   
-  // ejs template will only have access to urls approved by urlsForUser function
   const templateVars = {
     user: users[req.session['user_id']],
     urls: userURLs
@@ -91,10 +90,10 @@ app.get('/urls', (req, res) => {
 // user may input new URLs to be shortened on /urls/new
 app.get('/urls/new', (req, res) => {
 
-  // if cookies are not set (user isn't signed in), user is sent an error message prompting them to register or login
-  if (!req.session['user_id']) {
+  if (!req.session['user_id'] || loggedIn === false) {
 
-    // error HTML contains links to /login and /register
+    req.session['user_id'] = null;
+
     return res.status(403).send('<a href="/login">Login</a> or <a href="/register">Register</a> to shorten new URLs');
   }
 
@@ -102,26 +101,32 @@ app.get('/urls/new', (req, res) => {
 });
 
 
-// unique page generated for each shortened URL, accessible by anyone
+// unique page generated for each shortened URL
 app.get('/urls/:id', (req, res) => {
+
+  if (!req.session['user_id'] || loggedIn === false) {
+
+    req.session['user_id'] = null;
+
+    return res.status(403).send('<a href="/login">Login</a> or <a href="/register">Register</a> to view shortened URLs');
+  }
 
   // iterates through all URLs to access data related to specific shortURL
   for (const url in urlDatabase) {
     if (req.params.id === url) {
+      const url = urlDatabase[req.params.id];
 
-      // data for relevant shortURL passed to ejs template to be displayed on page
       const templateVars = {
         user: users[req.session['user_id']],
         shortURL: req.params.id,
-        longURL: urlDatabase[req.params.id].longURL,
-        visitCount: urlDatabase[req.params.id].visitCount
+        longURL: url.longURL,
+        visitCount: url.visitCount,
       };
 
       return res.render('urls_show', templateVars);
     }
   }
 
-  // error HTML if specified shortURL cannot be found in database
   res.status(404).send('Specified page cannot be found');
 });
 
@@ -134,9 +139,9 @@ app.get('/u/:id', (req, res) => {
     if (req.params.id === url) {
 
       // URL tied to shortURL assigned to variable
-      const longURL = urlDatabase[req.params.id].longURL;
+      const longURL = urlDatabase[url].longURL;
 
-      // increments appropriate URL's visit count when link is accessed
+      // increments URLs visit count every time /u/:id is accessed
       urlDatabase[req.params.id].visitCount++;
 
       // clicking on any of the shortURL links will redirect the user to the corresponding longURL in the urlDatabase object
@@ -160,7 +165,7 @@ app.post('/logout', (req, res) => {
 
   // clears user cookies and redirects user to login page
   req.session['user_id'] = null;
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
 
@@ -168,11 +173,11 @@ app.post('/logout', (req, res) => {
 app.post('/login', (req, res) => {
 
   if (!req.body.email || !req.body.password) { // error HTML if either input is empty
-    return res.status(400).send('Please enter an email and a password' + back('/login'));
+    return res.status(400).send('Please enter an email and a password' + generateGoBackHtml('/login'));
   }
 
   if (!getUserByEmail(users, req.body.email)) { // error HTML if email not in database
-    return res.status(403).send('There is no user registered to that email address' + back('/login'));
+    return res.status(403).send('There is no user registered to that email address' + generateGoBackHtml('/login'));
   }
 
   for (const user in users) {
@@ -181,13 +186,14 @@ app.post('/login', (req, res) => {
     if (bcrypt.compareSync(req.body.password, users[user].password)) {
 
       // on match, logs in by setting (encrypted) user cookies and redirects to url index
+      loggedIn = true;
       req.session['user_id'] = users[user].id;
       return res.redirect('/urls');
     }
   }
 
   // error HTML if matching password is not found
-  return res.status(403).send('Incorrect password' + back('/login'));
+  return res.status(403).send('Incorrect password' + generateGoBackHtml('/login'));
 });
 
 
@@ -195,11 +201,11 @@ app.post('/login', (req, res) => {
 app.post('/register', (req, res) => {
 
   if (!req.body.email || !req.body.password) { // error HTML if either input is empty
-    return res.status(400).send('Please enter an email and a password' + back('/register'));
+    return res.status(400).send('Please enter an email and a password' + generateGoBackHtml('/register'));
   }
 
   if (getUserByEmail(users, req.body.email)) { // error HTML if email already in database
-    return res.status(400).send('That email is already in use' + back('/register'));
+    return res.status(400).send('That email is already in use' + generateGoBackHtml('/register'));
   }
 
   const randomID = generateRandomString(); // generates "random," "unique" ID for user
@@ -212,6 +218,7 @@ app.post('/register', (req, res) => {
   };
 
   // automatically logs new user in by saving (encrypted) ID string to cookies
+  loggedIn = true;
   req.session['user_id'] = users[randomID].id;
   res.redirect('/urls');
 });
@@ -221,7 +228,7 @@ app.post('/register', (req, res) => {
 app.post('/urls', (req, res) => {
 
   if (!req.body.longURL) { // error HTML if input is empty
-    return res.status(400).send('Please enter a URL to be shortened' + back('/urls/new'));
+    return res.status(400).send('Please enter a URL to be shortened' + generateGoBackHtml('/urls/new'));
   }
 
   const shortURL = generateRandomString(); // generates "random," "unique" ID for shortened URL
@@ -236,7 +243,7 @@ app.post('/urls', (req, res) => {
   urlDatabase[shortURL] = {
     longURL: longURL,
     userID: req.session['user_id'], // user ID saved to cookies assigned to URL object to determine ownership
-    visitCount: 0
+    visitCount: 0,
   };
 
   // redirects to urls_show page for newly created shortURL
@@ -245,7 +252,7 @@ app.post('/urls', (req, res) => {
 
 
 // put triggered by clicking submit on urls_show page (next to edit input)
-app.put('/u/:id', (req, res) => {
+app.put('/urls/:id', (req, res) => {
 
   // checks if current users URLs include the shortURL shown on the current page
   if (!Object.keys(urlsForUser(urlDatabase, req.session['user_id'])).includes(req.params.id)) {
@@ -262,7 +269,7 @@ app.put('/u/:id', (req, res) => {
     longURL = 'http://' + longURL;
   }
 
-  // view count goes back down to 0 when destination is changed
+  // view count goes generateGoBackHtml down to 0 when destination is changed
   urlDatabase[req.params.id].visitCount = 0;
 
   // updates destination of shortened URL to match URL provided in input
@@ -305,4 +312,11 @@ app.delete('/urls/:id', (req, res) => {
 app.listen(PORT, () => {
   // message to console confirming that server is running
   console.log(`Express listening on port ${PORT}!`);
+
+  app.get('/', (req, res) => {
+    if (!req.session['user_id']) {
+      return res.redirect('/login');
+    }
+    res.redirect('/urls');
+  })
 });

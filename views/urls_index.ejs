@@ -34,8 +34,7 @@
             <!--longURL in column 2-->
             <td><%= urls[url] %></td>
             <!--edit button in column 3-->
-            <td><form method="POST" action="/urls/<%= url %>"><button type="submit" class="btn 
-            btn-outline-primary">Edit</button></form></td>
+            <td><form method="POST" action="/urls/<%= url %>"><button type="submit" class="btn btn-outline-primary">Edit</button></form></td>
             <!--delete button in column 4-->
             <td><form method="POST" action="/urls/<%= url %>?_method=delete"><button type="submit" class="btn btn-outline-danger">Delete</button></form></td>
           </tr>

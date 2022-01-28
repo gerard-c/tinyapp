@@ -1,5 +1,5 @@
 // anchor tag links to specified path out of error screens while keeping .send text clean
-const back = (route) => {
+const generateGoBackHtml = (route) => {
   return `<br><a href="${route}">BACK</a>`;
 }
 
@@ -38,8 +38,8 @@ const urlsForUser = (data, id) => {
   const output = {};
   
   //creates array containing the ID strings of database
-  const compare = Object.keys(data);
-  for (const key of compare) {
+  const urlIDs = Object.keys(data);
+  for (const key of urlIDs) {
 
     // if the user ID of a shortened URL matches the provided ID,
     // are added to the output object as { shortURL: longURL }
@@ -52,7 +52,7 @@ const urlsForUser = (data, id) => {
 
 
 module.exports = {
-  back,
+  generateGoBackHtml,
   getUserByEmail,
   generateRandomString,
   urlsForUser
