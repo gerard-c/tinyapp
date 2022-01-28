@@ -318,5 +318,5 @@ app.listen(PORT, () => {
       return res.redirect('/login');
     }
     res.redirect('/urls');
-  })
+  });
 });
