@@ -16,7 +16,7 @@ const PORT = 8080; // default
 // _method is used in HTML form actions to use otherwise unavailable methods
 app.use(methodOverride('_method'));
 
-app.use(morgan('short'));
+app.use(morgan('short')); // tells morgan to print http requests in short form
 
 app.use(bodyParser.urlencoded({ extended: true })); // enables body-parser to provide more detailed information
 
